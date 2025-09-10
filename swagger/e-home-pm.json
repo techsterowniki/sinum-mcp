@@ -1,0 +1,3272 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "[Local] eHome PM API",
+    "description": "eHome PM Process BackEnd API documentation",
+    "contact": { "email": "wojciech.marmurowicz@techsterowniki.pl" },
+    "version": "1.20.0"
+  },
+  "servers": [
+    {
+      "description": "Sinum Local API",
+      "url": "http://{hostname_or_ip}/api/v1",
+      "variables": { "hostname_or_ip": { "default": "sinum.local" } }
+    }
+  ],
+  "tags": [
+    { "name": "settings/network", "description": "Settings/Network endpoints" },
+    {
+      "name": "settings/hostname",
+      "description": "Settings/Hostname endpoints"
+    },
+    { "name": "settings/time", "description": "Settings/time endpoints" },
+    { "name": "settings/update", "description": "Settings/update endpoints" },
+    { "name": "settings/backup", "description": "Settings backup endpoints" },
+    {
+      "name": "settings/cyclic-backup",
+      "description": "Settings cyclic backup endpoints"
+    },
+    { "name": "settings/leds", "description": "Leds settings endpoints" },
+    {
+      "name": "settings/influx-devices",
+      "description": "Settings/Influx-Devices endpoints"
+    },
+    { "name": "influx/backup", "description": "Influx backup endpoints" },
+    { "name": "settings/register-url", "description": "Cloud register url" },
+    { "name": "settings/pm/logs", "description": "Log settings" },
+    { "name": "system", "description": "System management endpoints" },
+    { "name": "logs", "description": "Log globals" },
+    { "name": "info", "description": "Info" },
+    { "name": "identify", "description": "Identification" }
+  ],
+  "paths": {
+    "/settings/network": {
+      "get": {
+        "tags": ["settings/network"],
+        "summary": "Gets ethernet connection and wifi connection state, state - 100 means connected",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Network" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/network/list": {
+      "get": {
+        "tags": ["settings/network"],
+        "summary": "Returns all wifis in range list",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Network_WiFi_List" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": {
+            "description": "Unknown error or Wifi error.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "UnknownError": {
+                    "$ref": "#/components/examples/Response.UnknownError"
+                  },
+                  "wifi error": { "value": { "message": "Wifi error." } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/network/set-wifi": {
+      "post": {
+        "tags": ["settings/network"],
+        "summary": "accepts the password and the ssid of device which we would like to connect to",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Network_Set_WiFi" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": {
+            "description": "Unknown error or Wifi error.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "UnknownError": {
+                    "$ref": "#/components/examples/Response.UnknownError"
+                  },
+                  "wifi error": { "value": { "message": "Wifi error." } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/network/disconnect": {
+      "post": {
+        "tags": ["settings/network"],
+        "summary": "disconnects the wifi",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/network/wifi": {
+      "patch": {
+        "tags": ["settings/network"],
+        "summary": "update the wifi",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Network_Parameter" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/network/eth": {
+      "patch": {
+        "tags": ["settings/network"],
+        "summary": "update the eth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Network_Parameter" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/hostname": {
+      "get": {
+        "tags": ["settings/hostname"],
+        "summary": "gets the hostname of cetral unit",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Hostname" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "post": {
+        "tags": ["settings/hostname"],
+        "summary": "sets the new hostname",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Hostname" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Hostname" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time": {
+      "get": {
+        "tags": ["settings/time"],
+        "summary": "gets time data",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Time" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time/timezone": {
+      "post": {
+        "tags": ["settings/time"],
+        "summary": "sets the timezone",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Timezone" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Time" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time/timezones-list": {
+      "get": {
+        "tags": ["settings/time"],
+        "summary": "gets the timezones list",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/TimeZones" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time/ntp-enable": {
+      "post": {
+        "tags": ["settings/time"],
+        "summary": "turns on/off the time synchronization with server",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Ntp" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Time" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time/timestamp": {
+      "post": {
+        "tags": ["settings/time"],
+        "summary": "sets the timestamp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Timestamp" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "409": {
+            "description": "Forbidden.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "example": {
+                  "error": { "message": { "text": "Forbidden.", "id": 7322 } }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/time/time": {
+      "post": {
+        "tags": ["settings/time"],
+        "summary": "sets the time in rfc3339 format",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TimeRfc3339" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "409": {
+            "description": "Forbidden.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "example": {
+                  "error": { "message": { "text": "Forbidden.", "id": 7322 } }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/update": {
+      "get": {
+        "tags": ["settings/update"],
+        "summary": "get central unit update data",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Update" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "delete": {
+        "tags": ["settings/update"],
+        "summary": "deletes downloaded central unit software update",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Filesystem error.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Filesystem error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Filesystem error.", "id": 7291 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "409": {
+            "description": "Forbidden.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Forbidden Error": {
+                    "description": "Returned when update process is not idle.",
+                    "value": {
+                      "error": {
+                        "message": { "text": "Forbidden.", "id": 7322 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/update/check": {
+      "post": {
+        "tags": ["settings/update"],
+        "summary": "run process which will check whether is update and download file if available",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/update/check-only": {
+      "post": {
+        "tags": ["settings/update"],
+        "summary": "run process which will check whether is update",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/update/checkusb": {
+      "post": {
+        "tags": ["settings/update"],
+        "summary": "run process which will check whether is usb update",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/update/run": {
+      "post": {
+        "tags": ["settings/update"],
+        "summary": "runs central unit software update",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/backup": {
+      "get": {
+        "tags": ["settings/backup"],
+        "summary": "returns list of backups you can find on cenral unit",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Backup" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Filesystem error or Invalid object ID.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Filesystem error": {
+                    "value": { "error": { "message": "Filesystem error." } }
+                  },
+                  "Invalid object ID": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "post": {
+        "tags": ["settings/backup"],
+        "summary": "Upload backup file",
+        "requestBody": {
+          "content": {
+            "application/tar": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "example": "{tar_data_here}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/BackupDetailItem" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "delete": {
+        "tags": ["settings/backup"],
+        "summary": "deletes backup, REQUIRES SAME BODY AS /settings/load-backup but oas3 does not allow to pass request body to delete http method",
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Filesystem error or Invalid object ID.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Filesystem error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Filesystem error.", "id": 7291 }
+                      }
+                    }
+                  },
+                  "Invalid object ID": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Invalid object ID.", "id": 7207 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": {
+            "description": "Unknown error or File not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Unknown error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Unknown error.", "id": 7220 }
+                      }
+                    }
+                  },
+                  "File not found": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "File not found", "id": 7310 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/create-backup": {
+      "post": {
+        "tags": ["settings/backup"],
+        "summary": "creates backup with save of current settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BackupCreate" }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Filesystem error or Invalid object ID.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Filesystem error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Filesystem error.", "id": 7291 }
+                      }
+                    }
+                  },
+                  "Invalid object ID": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Invalid object ID.", "id": 7207 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": {
+            "description": "Unknown error.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Unknown error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Unknown error.", "id": 7220 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/load-backup": {
+      "post": {
+        "tags": ["settings/backup"],
+        "summary": "loads backup you choose",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BackupHandle" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "400": {
+            "description": "Invalid object ID.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "example": {
+                  "error": {
+                    "message": { "text": "Invalid object ID.", "id": 7207 }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": {
+            "description": "Unknown error, Bad uid or Failed to extract file",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "Failed to extract file error": {
+                    "value": {
+                      "error": {
+                        "message": {
+                          "text": "Failed to extract file",
+                          "id": 7345
+                        }
+                      }
+                    }
+                  },
+                  "Bad uid error": {
+                    "value": {
+                      "error": { "message": { "text": "Bad uid.", "id": 7344 } }
+                    }
+                  },
+                  "Unknown error": {
+                    "value": {
+                      "error": {
+                        "message": { "text": "Unknown error.", "id": 7720 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/backup/file/{name}": {
+      "get": {
+        "tags": ["settings/backup"],
+        "summary": "download backup file",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": { "type": "string" },
+            "required": true,
+            "description": "Name of backup file to download"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/tar": {
+                "schema": {
+                  "type": "object",
+                  "title": "BackupFile",
+                  "format": "binary",
+                  "example": "{tar_data_here}"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/import-backup": {
+      "post": {
+        "tags": ["settings/backup"],
+        "summary": "Import backup file from other device, will not restore users. Deletes statistics. New automatic backup is created immediately after import.",
+        "requestBody": {
+          "content": {
+            "application/tar": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "example": "{tar_data_here}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Success, no content returned." },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/cyclic-backup": {
+      "get": {
+        "tags": ["settings/cyclic-backup"],
+        "summary": "Get current cyclic backup settings.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CyclicBackup" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["settings/cyclic-backup"],
+        "summary": "Update cyclic backup settings.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CyclicBackup" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CyclicBackup" }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/leds": {
+      "get": {
+        "tags": ["settings/leds"],
+        "summary": "Get current leds settings.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/LedSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["settings/leds"],
+        "summary": "Update leds settings.",
+        "requestBody": {
+          "description": "LedSettings model.<br> **NOTE:** Partial update is possible by sending single member of object, then rest of values remain unmodified.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LedSettings" },
+              "examples": {
+                "Update": { "$ref": "#/components/examples/LedSettings" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/LedSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-devices/info": {
+      "get": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Gets a list of information about each block device.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InfluxDevice_List" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-devices/info/{id}": {
+      "get": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Gets information about a desired block device.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "description": "device's numeric identifier",
+              "example": 1
+            },
+            "required": true,
+            "description": "Unique numeric ID of the block device."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/InfluxDevice" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-devices/formatter": {
+      "get": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Gets information about the state of formatter.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "FormatterState",
+                      "required": ["id", "state"],
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "unique numeric ID of a device that is/was currently/previously formatted, equals 0 before the first formatting",
+                          "example": 1
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "last/current formatting process' state",
+                          "example": "in_progress",
+                          "enum": ["success", "in_progress", "failure"]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-devices/formatter/{id}": {
+      "post": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Starts formatting process of a desired block device.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "description": "device's numeric identifier",
+              "example": 1
+            },
+            "required": true,
+            "description": "Unique numeric ID of the block device."
+          }
+        ],
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": {
+            "description": "Unknown error or Formatting already in progress.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "UnknownError": {
+                    "$ref": "#/components/examples/Response.UnknownError"
+                  },
+                  "FormattingAlreadyInProgress": {
+                    "$ref": "#/components/examples/Response.Formatting"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/influx-devices/active-device": {
+      "get": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Gets information about the currently activated influx device and the partition on which the influx database is stored.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "CurrentActiveInfluxDevice",
+                      "required": [
+                        "device_identifier",
+                        "device_name",
+                        "partition_number"
+                      ],
+                      "properties": {
+                        "device_identifier": {
+                          "type": "string",
+                          "description": "hardware identifier of the active influx device",
+                          "example": "sinum_sd_slot"
+                        },
+                        "device_name": {
+                          "type": "string",
+                          "description": "name of the active influx device",
+                          "example": "SD Card"
+                        },
+                        "partition_number": {
+                          "type": "integer",
+                          "description": "number of the partition on which the influx database is stored",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-devices/active-device/{id}/{partno}": {
+      "post": {
+        "tags": ["settings/influx-devices"],
+        "summary": "Selects the influx active device and the partition on which we want to store the influx database.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer",
+              "description": "device's numeric identifier",
+              "example": 1
+            },
+            "required": true,
+            "description": "Numeric ID of the block device on which we want to store the Influx database."
+          },
+          {
+            "in": "path",
+            "name": "partno",
+            "schema": {
+              "type": "integer",
+              "description": "partition's number",
+              "example": 1
+            },
+            "required": true,
+            "description": "Number of the device's partition on which we want to store the Influx database."
+          }
+        ],
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "InvalidObjectIdSupplied": {
+                    "$ref": "#/components/examples/Response.InvalidObjectIdSupplied"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/influx-backup": {
+      "get": {
+        "tags": ["influx/backup"],
+        "summary": "Get current influx backup settings.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxBackupSettings"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["influx/backup"],
+        "summary": "Update influx backup settings.",
+        "requestBody": {
+          "description": "InfluxBackupSettings model.<br> **NOTE:** Partial update is possible by sending single member of object, then rest of values remain unmodified.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InfluxBackupSettings" },
+              "examples": {
+                "Update": {
+                  "$ref": "#/components/examples/InfluxBackupSettings"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxBackupSettings"
+                }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  },
+                  "EmptyDataError": {
+                    "$ref": "#/components/examples/Response.EmptyDataError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "422": { "$ref": "#/components/responses/ValidationFailed" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/influx/backup": {
+      "get": {
+        "tags": ["influx/backup"],
+        "summary": "Get current influx backups list.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "title": "BackupList",
+                      "items": { "type": "string" },
+                      "example": [
+                        "/media/sdb1/stat_bkp/backup_2025-03-10.tar",
+                        "/media/sdb1/stat_bkp/backup_2025-03-11.tar"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/influx/load-backup": {
+      "post": {
+        "tags": ["influx/backup"],
+        "summary": "Load influx backup. Can only load backups stored on removable device connected to central unit.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["file_name"],
+                "properties": {
+                  "file_name": {
+                    "type": "string",
+                    "example": "/media/sdb1/stat_bkp/backup_2025-03-10.tar"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success. Import task started wait for `influx_backup_loaded` event for success or `influx_backup_error` for failure."
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "422": { "$ref": "#/components/responses/ValidationFailed" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/influx/import-backup": {
+      "post": {
+        "tags": ["influx/backup"],
+        "summary": "Import influx backup from other device.",
+        "requestBody": {
+          "content": {
+            "application/tar": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "example": "{tar_data_here}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success. Import task started wait for `influx_backup_imported` event for success or `influx_backup_error` for failure."
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "404": { "$ref": "#/components/responses/ObjectNotFound" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "422": { "$ref": "#/components/responses/ValidationFailed" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/register-url": {
+      "get": {
+        "tags": ["settings/register-url"],
+        "summary": "Returns cloud registration url (connecting eHome with cloud)",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "StandardRegisterUrl",
+                      "required": ["url"],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "example": "https://ehome-cloud.eu/share/device/23c9064c-c72d-4d26-bff8-d63842051cd5"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/fast-register": {
+      "get": {
+        "tags": ["settings/register-url"],
+        "summary": "Returns cloud registration url (connecting eHome with cloud)",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "FastRegisterUrl",
+                      "required": ["url"],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "example": "https://ehome-cloud.eu/share/device/23c9064c-c72d-4d26-bff8-d63842051cd5"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/pm/logs": {
+      "get": {
+        "tags": ["settings/pm/logs"],
+        "summary": "Get current log settings.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/LogSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["settings/pm/logs"],
+        "summary": "Update log settings.",
+        "requestBody": {
+          "description": "LogSettings model.<br> **NOTE:** Partial update is possible by sending single member of object, then rest of values remain unmodified.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogSettings" },
+              "examples": {
+                "Update": { "$ref": "#/components/examples/LogSettings" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/LogSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/settings/pm/logs/live": {
+      "get": {
+        "tags": ["settings/pm/logs"],
+        "summary": "Get info if log streaming via websocket channel is enabled or not.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "LiveLogSettings",
+                      "required": ["enabled"],
+                      "properties": { "enabled": { "type": "boolean" } }
+                    }
+                  }
+                },
+                "example": { "data": { "enabled": true } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["settings/pm/logs"],
+        "summary": "Update log streaming settings.",
+        "requestBody": {
+          "description": "Live settings model.<br> **NOTE:** Partial update is not possible here!",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["enabled"],
+                "properties": { "enabled": { "type": "boolean" } }
+              },
+              "example": { "enabled": true }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "title": "LiveLogSettings",
+                      "required": ["enabled"],
+                      "properties": { "enabled": { "type": "boolean" } }
+                    }
+                  }
+                },
+                "example": { "data": { "enabled": true } }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  },
+                  "EmptyDataError": {
+                    "$ref": "#/components/examples/Response.EmptyDataError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/system/reboot": {
+      "post": {
+        "tags": ["system"],
+        "summary": "Starts system reboot process.",
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/system/shutdown": {
+      "post": {
+        "tags": ["system"],
+        "summary": "Starts system shutdown process.",
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/system/resources": {
+      "get": {
+        "tags": ["system"],
+        "summary": "Get system resources task settings.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemResourcesSettings"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      },
+      "patch": {
+        "tags": ["system"],
+        "summary": "Update system resources task settings.",
+        "requestBody": {
+          "description": "System Resources settings.<br> *NOTE:* Parameter `enabled` is required in every request. Parameter `interval` is optional. Defaults to 5 seconds if not passed.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemResourcesSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemResourcesSettings"
+                }
+              }
+            }
+          },
+          "304": { "$ref": "#/components/responses/NotModified" },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Response.Error" },
+                "examples": {
+                  "EmptyDataError": {
+                    "$ref": "#/components/examples/Response.EmptyDataError"
+                  },
+                  "RequestParseError": {
+                    "$ref": "#/components/examples/Response.RequestParseError"
+                  },
+                  "GoRequestParseError": {
+                    "$ref": "#/components/examples/Response.GoRequestParseError"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "422": { "$ref": "#/components/responses/ValidationFailed" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/logs": {
+      "get": {
+        "tags": ["logs"],
+        "summary": "Get log archive.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": { "data": { "type": "object" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/info": {
+      "get": {
+        "tags": ["info"],
+        "summary": "Get info.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Info",
+                  "required": [
+                    "api",
+                    "name",
+                    "tdfp_uuid",
+                    "uid",
+                    "version",
+                    "device_type",
+                    "ip",
+                    "firm",
+                    "id_reg"
+                  ],
+                  "properties": {
+                    "api": { "type": "string", "example": "1.3" },
+                    "name": { "type": "string", "example": "sinum" },
+                    "tdfp_uuid": {
+                      "type": "string",
+                      "example": "4210000000a10f063bf5a871"
+                    },
+                    "uid": {
+                      "type": "string",
+                      "example": "0xt210000000a10f063bfua8g17y23a4"
+                    },
+                    "version": { "type": "string", "example": "1.13.0" },
+                    "device_type": {
+                      "description": "Type of central device.",
+                      "type": "string",
+                      "enum": [
+                        "sinum",
+                        "sinum_pro",
+                        "sinum_lite",
+                        "sinum_short",
+                        "sinum_short_standard"
+                      ],
+                      "example": "sinum"
+                    },
+                    "ip": {
+                      "type": "string",
+                      "description": "IP address of central unit."
+                    },
+                    "firm": {
+                      "description": "Enum value representing firm name.",
+                      "readOnly": true,
+                      "allOf": [{ "$ref": "#/components/schemas/Firm" }]
+                    },
+                    "id_reg": {
+                      "type": "string",
+                      "description": "Region Id",
+                      "example": "EU"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    },
+    "/identify": {
+      "post": {
+        "tags": ["identify"],
+        "summary": "Central device visual identification - blinks all LEDs.",
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "401": { "$ref": "#/components/responses/UnauthorizedError" },
+          "408": { "$ref": "#/components/responses/RequestTimeout" },
+          "500": { "$ref": "#/components/responses/UnknownError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Firm": {
+        "type": "string",
+        "example": "tech",
+        "enum": [
+          "zebiec",
+          "zarezerwowane",
+          "defro",
+          "kolton",
+          "stalmark",
+          "tech",
+          "watt",
+          "sas",
+          "galmet",
+          "regess",
+          "elektromet",
+          "lester",
+          "viadrus",
+          "solimpex",
+          "dimplex",
+          "poleko",
+          "coolwex",
+          "termotech",
+          "kalvis",
+          "oeg",
+          "krzaczek",
+          "skorut",
+          "wanas",
+          "solver",
+          "opop",
+          "kamen",
+          "gren",
+          "moderator",
+          "kipi",
+          "drewmet",
+          "dospel",
+          "ekoefekt",
+          "cool",
+          "oem",
+          "lumen",
+          "ensol",
+          "kospel",
+          "budmet",
+          "master",
+          "polypipe",
+          "bado",
+          "stalmax",
+          "tqd",
+          "nmt",
+          "sunex",
+          "alltherm",
+          "valvex",
+          "evenes",
+          "verano",
+          "kotlospaw",
+          "dakon",
+          "venma",
+          "zk_design",
+          "jaga",
+          "lechma",
+          "eplucon",
+          "typhoon",
+          "kampmann",
+          "plonka",
+          "puste_id",
+          "afriso",
+          "ognik",
+          "elias",
+          "brastal",
+          "makroterm",
+          "metalfach",
+          "termotechnika",
+          "paw",
+          "maga",
+          "viessmann",
+          "isan",
+          "polytherm",
+          "grobelny",
+          "protech",
+          "axiomtech",
+          "kotlobud_osiek",
+          "setlans",
+          "dozameh_odessa",
+          "convector",
+          "salda",
+          "rojek",
+          "strawa",
+          "dworek",
+          "drahos",
+          "rakoczy",
+          "robot",
+          "kotly_leszka",
+          "kesseleco",
+          "jawo",
+          "hotjet",
+          "malejka",
+          "attack",
+          "lokca",
+          "umet",
+          "thermagen",
+          "candle",
+          "roth",
+          "wolga",
+          "smay",
+          "ponast",
+          "dexwal",
+          "kokoszka_lotz",
+          "specstal",
+          "landzberg",
+          "er_system",
+          "stout",
+          "purmo",
+          "gp_system",
+          "ivar",
+          "ventilus",
+          "blue_install",
+          "termojet",
+          "lavoro",
+          "unical",
+          "variotherm",
+          "slokov",
+          "silesia_term",
+          "pellasx",
+          "karino",
+          "klimor",
+          "venture",
+          "topvac",
+          "ekoenergia",
+          "weishaupt",
+          "bartosz",
+          "nutech_renewables",
+          "solis",
+          "rotburg",
+          "easy_flex",
+          "sirac",
+          "haenke",
+          "ekogalva",
+          "qbl",
+          "econtro",
+          "four_eco",
+          "columbus",
+          "sadeko",
+          "kombi",
+          "hymon",
+          "kora",
+          "toolco",
+          "kaisai",
+          "debe",
+          "benekov",
+          "ground_therm",
+          "unknown"
+        ]
+      },
+      "LogSettings": {
+        "description": "PM process logger settings representation.",
+        "type": "object",
+        "required": ["log", "debug"],
+        "properties": {
+          "log": {
+            "description": "Logging settings.",
+            "type": "object",
+            "required": ["INFO", "STATUS", "WARNING", "ERROR"],
+            "properties": {
+              "INFO": { "type": "boolean" },
+              "STATUS": { "type": "boolean" },
+              "WARNING": { "type": "boolean" },
+              "ERROR": { "type": "boolean" }
+            }
+          },
+          "debug": {
+            "description": "Debugging settings.",
+            "type": "object",
+            "required": [
+              "STANDARD_DEBUG",
+              "EVENTBUS_DEBUG",
+              "REST_DEBUG",
+              "DBG_BUTTON",
+              "DBG_WS",
+              "DBUS",
+              "TECH_UPDATE",
+              "UPDATE_CONTROLER"
+            ],
+            "properties": {
+              "STANDARD_DEBUG": { "type": "boolean" },
+              "EVENTBUS_DEBUG": { "type": "boolean" },
+              "REST_DEBUG": { "type": "boolean" },
+              "DBG_BUTTON": { "type": "boolean" },
+              "DBG_WS": { "type": "boolean" },
+              "DBUS": { "type": "boolean" },
+              "TECH_UPDATE": { "type": "boolean" },
+              "UPDATE_CONTROLER": { "type": "boolean" }
+            }
+          }
+        },
+        "example": { "$ref": "#/components/examples/LogSettings/value" }
+      },
+      "LedSettings": {
+        "description": "System led settings representation.",
+        "type": "object",
+        "required": ["mode"],
+        "properties": {
+          "mode": {
+            "description": "Led control mode.",
+            "type": "string",
+            "enum": ["off", "managed_by_system"]
+          }
+        },
+        "example": { "$ref": "#/components/examples/LedSettings/value" }
+      },
+      "BackupHandle": {
+        "type": "object",
+        "required": ["file_name"],
+        "properties": {
+          "file_name": { "type": "string", "example": "13:29_20-05-2020.tar" }
+        }
+      },
+      "BackupCreate": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "Hey, I am creating backup with description"
+          }
+        }
+      },
+      "BackupDetailItem": {
+        "type": "object",
+        "required": ["detail", "file_name", "id"],
+        "properties": {
+          "detail": {
+            "type": "object",
+            "required": [
+              "compatible",
+              "date",
+              "description",
+              "timestamp",
+              "uid",
+              "version"
+            ],
+            "properties": {
+              "compatible": {
+                "type": "string",
+                "description": "carrierBoard backup is compatible with",
+                "example": "eHome_v1"
+              },
+              "date": {
+                "type": "string",
+                "description": "backup creation date",
+                "format": "date"
+              },
+              "description": {
+                "type": "string",
+                "description": "backup description",
+                "example": "Backup is important"
+              },
+              "timestamp": {
+                "type": "integer",
+                "description": "a date of a backup creation in epoch time",
+                "example": 1592835008
+              },
+              "uid": {
+                "type": "string",
+                "description": "Central unit ID",
+                "example": "604355a280cc9d713100842000"
+              },
+              "version": {
+                "type": "string",
+                "description": "ehome software version",
+                "example": "0.0.3"
+              }
+            }
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Backup filename",
+            "example": "13:08_20-05-2020.tar"
+          },
+          "id": { "type": "integer", "description": "backup id", "example": 4 }
+        }
+      },
+      "Backup": {
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BackupDetailItem" }
+          }
+        }
+      },
+      "CyclicBackup": {
+        "type": "object",
+        "required": ["backup_cycle"],
+        "properties": {
+          "backup_cycle": {
+            "description": "Number of days automatic cyclic backup is to be created. 0 means automatic cyclic backup is turned off.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365,
+            "example": 0
+          }
+        }
+      },
+      "Changelog": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["version", "changelog"],
+          "properties": {
+            "version": {
+              "type": "string",
+              "description": "Version that the changes apply to.",
+              "example": "1.5.0"
+            },
+            "changelog": {
+              "type": "object",
+              "required": ["pl", "en"],
+              "description": "Changes in version.",
+              "properties": {
+                "pl": {
+                  "type": "array",
+                  "description": "Changes in polish.",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "description"],
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "Change number.",
+                        "example": 1
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Change description.",
+                        "example": "Poprawa połączenia cloud."
+                      }
+                    }
+                  }
+                },
+                "en": {
+                  "type": "array",
+                  "description": "Changes in english.",
+                  "items": {
+                    "type": "object",
+                    "required": ["id", "description"],
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "Change number.",
+                        "example": 1
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Change description.",
+                        "example": "Cloud connection fixes."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Update": {
+        "type": "object",
+        "required": [
+          "boot_a_left",
+          "boot_b_left",
+          "boot_current",
+          "boot_order",
+          "bootloader",
+          "compatible",
+          "device_name",
+          "dizzy_version",
+          "downloaded",
+          "percent",
+          "ehome_version",
+          "firm",
+          "id_firm",
+          "id_reg",
+          "id_type",
+          "pm_version",
+          "tech_rs_version",
+          "uart_radio_version",
+          "uid",
+          "update_state",
+          "version",
+          "version_carrier_board",
+          "version_config",
+          "version_data",
+          "version_env",
+          "version_main_board",
+          "version_rootFS",
+          "version_uBoot",
+          "new_version_available"
+        ],
+        "properties": {
+          "boot_a_left": {
+            "type": "string",
+            "description": "Number of attemps left to start system A",
+            "example": "3"
+          },
+          "boot_b_left": {
+            "type": "string",
+            "description": "Number of attemps left to start system B",
+            "example": "3"
+          },
+          "boot_current": {
+            "type": "string",
+            "description": "Currently booted system",
+            "example": "1"
+          },
+          "boot_order": {
+            "type": "string",
+            "description": "Boot order",
+            "example": "A B"
+          },
+          "bootloader": {
+            "type": "string",
+            "description": "Second level bootloader type",
+            "example": "uboot"
+          },
+          "compatible": {
+            "type": "string",
+            "description": "Compatible carrier boards",
+            "example": "eHome_v1"
+          },
+          "device_name": {
+            "type": "string",
+            "description": "Controller name",
+            "example": "eHome_v1"
+          },
+          "dizzy_version": {
+            "type": "string",
+            "description": "Backend Version"
+          },
+          "downloaded": {
+            "description": "Field with information about downloaded software update.",
+            "type": "object",
+            "required": [
+              "is_update",
+              "update_version",
+              "new_version",
+              "changelog"
+            ],
+            "properties": {
+              "is_update": {
+                "type": "boolean",
+                "description": "Field which show whether is software update downloaded.",
+                "example": true
+              },
+              "update_version": {
+                "type": "string",
+                "description": "Downloaded software version update",
+                "example": "1.5.0"
+              },
+              "new_version": {
+                "type": "boolean",
+                "description": "Indicates if downloaded software version is different than current software version.",
+                "example": true
+              },
+              "changelog": {
+                "type": "array",
+                "description": "Array with information about changes from current software version to downloaded software version.",
+                "items": { "$ref": "#/components/schemas/Changelog" }
+              }
+            }
+          },
+          "percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "description": "Download or update percent of software update. (Based on `update_state` value)",
+            "example": 0
+          },
+          "ehome_version": {
+            "type": "string",
+            "description": "Ehome process version (main process)",
+            "example": "0.3.7Build: Jun  3 2020 13:19:58"
+          },
+          "firm": {
+            "description": "Enum value representing firm name.",
+            "readOnly": true,
+            "allOf": [{ "$ref": "#/components/schemas/Firm" }]
+          },
+          "id_firm": {
+            "type": "string",
+            "description": "Firm Id",
+            "example": "6"
+          },
+          "id_reg": {
+            "type": "string",
+            "description": "Region Id",
+            "example": "EU"
+          },
+          "id_type": {
+            "type": "string",
+            "description": "Controller id",
+            "example": "EH_v1"
+          },
+          "pm_version": {
+            "type": "string",
+            "description": "PM process version",
+            "example": "pm: v0.3.6Build: Jun 16 2020 14:40:41 DEBUG"
+          },
+          "tech_rs_version": {
+            "type": "string",
+            "description": "TechRS process version",
+            "example": "0.0.5Build: May 27 2020 22:57:43"
+          },
+          "uart_radio_version": {
+            "type": "string",
+            "description": "Uart radio process version",
+            "example": "0.1.8Build: Jun  2 2020 10:39:04"
+          },
+          "uid": {
+            "type": "string",
+            "description": "unique CPU id",
+            "example": "63e18d8463099d713100642000"
+          },
+          "update_state": {
+            "type": "string",
+            "description": "State of update e.g `check`ing, `download`ing",
+            "example": "check",
+            "enum": ["idle", "check", "download", "update"]
+          },
+          "version": {
+            "type": "string",
+            "description": "The main version, most important",
+            "example": "0.0.8"
+          },
+          "version_carrier_board": {
+            "type": "string",
+            "description": "Carrierboard version",
+            "example": "ST-658_0_A"
+          },
+          "version_config": {
+            "type": "string",
+            "description": "Software config version",
+            "example": "1"
+          },
+          "version_data": {
+            "type": "string",
+            "description": "Date of version release",
+            "example": "20200331"
+          },
+          "version_env": {
+            "type": "string",
+            "description": "Bootloader parameters version",
+            "example": "1"
+          },
+          "version_main_board": {
+            "type": "string",
+            "description": "Mainboard version",
+            "example": "1.00.1_A"
+          },
+          "version_rootFS": {
+            "type": "string",
+            "description": "File system version",
+            "example": "Test_1"
+          },
+          "version_uBoot": {
+            "type": "string",
+            "description": "Uboot confguration version",
+            "example": "1.0.2"
+          },
+          "new_version_available": {
+            "type": "boolean",
+            "description": "Indicates if there is new version available online.",
+            "example": false
+          }
+        }
+      },
+      "Timestamp": {
+        "type": "object",
+        "required": ["timestamp"],
+        "properties": {
+          "time": {
+            "type": "integer",
+            "description": "epoch time timestamp in local time",
+            "example": 1232313123
+          }
+        }
+      },
+      "TimeRfc3339": {
+        "type": "object",
+        "required": ["time"],
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "time in rfc3339 format",
+            "example": "2024-06-11T15:03:02.144484210+00:00"
+          }
+        }
+      },
+      "Ntp": {
+        "type": "object",
+        "required": ["ntp_enable"],
+        "properties": {
+          "ntp_enable": {
+            "type": "boolean",
+            "description": "pass true to set server time synchronization on else false",
+            "example": true
+          }
+        }
+      },
+      "Timezone": {
+        "type": "object",
+        "required": ["timezone"],
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "description": "a timezone have to be an tz item from the /settings/time/timezones-list request",
+            "example": "Europe/Warsaw"
+          }
+        }
+      },
+      "TimeZoneItem": {
+        "type": "object",
+        "required": ["offset", "tz"],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "description": "time offset in minutes to UTC 00:00 eg. 60 = 1hour offset, -60 = -1hour offset",
+            "example": -60
+          },
+          "tz": {
+            "type": "string",
+            "description": "timezone",
+            "example": "Africa/Accra"
+          }
+        }
+      },
+      "TimeZones": {
+        "type": "object",
+        "required": ["listZone"],
+        "properties": {
+          "listZone": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TimeZoneItem" }
+          }
+        }
+      },
+      "Time": {
+        "type": "object",
+        "required": [
+          "ntp_enable",
+          "ntp_synchronized",
+          "timestamp",
+          "timezone",
+          "time"
+        ],
+        "properties": {
+          "ntp_enable": {
+            "type": "boolean",
+            "description": "shows whether synchronization server is enabled",
+            "example": true
+          },
+          "ntp_synchronized": {
+            "type": "boolean",
+            "description": "shows whether time is synchronized with server (time can be synchronized even if sync server is off)",
+            "example": true
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "epoch time timestamp"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Continent/City timezone",
+            "example": "Europe/Warsaw"
+          },
+          "time": {
+            "type": "string",
+            "description": "time in rfc3339 format",
+            "example": "2024-06-11T15:03:02.144484210+00:00"
+          }
+        }
+      },
+      "Hostname": {
+        "type": "object",
+        "required": ["hostname"],
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "description": "A hostname",
+            "example": "ehome-sokol-biuro"
+          }
+        }
+      },
+      "Network_Set_WiFi": {
+        "type": "object",
+        "required": ["ssid", "psk"],
+        "properties": {
+          "ssid": {
+            "type": "string",
+            "description": "Wifi we would like to connect",
+            "example": "EHomeWiFi"
+          },
+          "psk": {
+            "type": "string",
+            "description": "if wifi is secured we should pass password to this field",
+            "example": "veryStrongPassword"
+          }
+        }
+      },
+      "Network_Parameter": {
+        "type": "object",
+        "required": ["dhcp", "ip", "dns", "gateway", "mask"],
+        "properties": {
+          "dhcp": {
+            "type": "boolean",
+            "description": "dhcp status",
+            "example": true
+          },
+          "ip": {
+            "type": "string",
+            "description": "ip address",
+            "example": "10.0.0.100"
+          },
+          "dns": {
+            "type": "string",
+            "description": "dns address",
+            "example": "10.0.0.100"
+          },
+          "gateway": {
+            "type": "string",
+            "description": "gateway address",
+            "example": "10.0.0.100"
+          },
+          "mask": {
+            "type": "string",
+            "description": "ip mask",
+            "example": "10.0.0.100"
+          }
+        }
+      },
+      "Network_WiFi_Base": {
+        "type": "object",
+        "required": ["security", "ssid", "strength"],
+        "properties": {
+          "security": {
+            "type": "boolean",
+            "description": "shows whether wifi connection is secured (no matter which algoritm)",
+            "example": true
+          },
+          "ssid": {
+            "type": "string",
+            "description": "wifi's ssid",
+            "example": "My wifi"
+          },
+          "strength": {
+            "type": "string",
+            "description": "wifi connection strength",
+            "example": "50"
+          }
+        }
+      },
+      "Network_WiFi_Item": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Network_WiFi_Base" },
+          {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "wifi id",
+                "example": 1
+              }
+            }
+          }
+        ]
+      },
+      "Network_WiFi_List": {
+        "type": "object",
+        "required": ["list"],
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Network_WiFi_Item" }
+          }
+        }
+      },
+      "Network_Eth": {
+        "type": "object",
+        "required": ["dhcp", "dns", "gateway", "ip", "mask", "mac", "state"],
+        "properties": {
+          "dhcp": {
+            "type": "boolean",
+            "description": "shows whether dchp is on/off",
+            "example": true
+          },
+          "dns": {
+            "type": "string",
+            "description": "dns address",
+            "example": "10.0.60.5"
+          },
+          "gateway": {
+            "type": "string",
+            "description": "gateway address",
+            "example": "10.0.60.5"
+          },
+          "ip": {
+            "type": "string",
+            "description": "ip address",
+            "example": "10.0.61.200"
+          },
+          "mask": {
+            "type": "string",
+            "description": "network mask",
+            "example": "255.255.252.0"
+          },
+          "mac": {
+            "type": "string",
+            "description": "mac address",
+            "example": "02:43:32:16:41:0D"
+          },
+          "state": {
+            "type": "string",
+            "description": "connection state",
+            "example": "connected",
+            "enum": [
+              "connected",
+              "disconnected",
+              "bad_password",
+              "access_point"
+            ]
+          }
+        }
+      },
+      "Network_WiFi": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Network_Eth" },
+          { "$ref": "#/components/schemas/Network_WiFi_Base" }
+        ]
+      },
+      "Network": {
+        "type": "object",
+        "required": ["eth", "wifi"],
+        "properties": {
+          "eth": { "$ref": "#/components/schemas/Network_Eth" },
+          "wifi": { "$ref": "#/components/schemas/Network_WiFi" }
+        }
+      },
+      "InfluxDevice_Root": {
+        "type": "object",
+        "required": [
+          "device_identifier",
+          "device_name",
+          "device_size",
+          "device_state",
+          "device_type",
+          "id"
+        ],
+        "properties": {
+          "device_identifier": {
+            "type": "string",
+            "description": "connected device's hardware identifier",
+            "example": "sinum_sd_slot"
+          },
+          "device_name": {
+            "type": "string",
+            "description": "connected device's name (vendor+model in case of USB devices)",
+            "example": "SD Card"
+          },
+          "device_size": {
+            "type": "string",
+            "description": "connected device's overall size",
+            "example": "14.5G"
+          },
+          "device_state": {
+            "type": "string",
+            "description": "device's internal state",
+            "example": "ready",
+            "enum": ["not_found", "loading", "needs_formatting", "ready"]
+          },
+          "device_type": {
+            "type": "string",
+            "description": "device's type",
+            "example": "SD",
+            "enum": ["SD", "USB"]
+          },
+          "id": {
+            "type": "integer",
+            "description": "device's numeric identifier",
+            "example": 1
+          }
+        }
+      },
+      "InfluxDevice_Partition": {
+        "type": "object",
+        "required": ["label", "number", "size", "state"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "partition's label",
+            "example": "MY_LABEL"
+          },
+          "number": {
+            "type": "integer",
+            "description": "partition's number",
+            "example": 1
+          },
+          "size": {
+            "type": "string",
+            "description": "partition's size",
+            "example": "14.5G"
+          },
+          "state": {
+            "type": "string",
+            "description": "partition's state",
+            "example": "ready",
+            "enum": ["not_available", "loading", "ready"]
+          }
+        }
+      },
+      "InfluxDevice_Partition_Table": {
+        "type": "object",
+        "required": ["partitions"],
+        "properties": {
+          "partitions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InfluxDevice_Partition" }
+          }
+        }
+      },
+      "InfluxDevice": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/InfluxDevice_Root" },
+          { "$ref": "#/components/schemas/InfluxDevice_Partition_Table" }
+        ]
+      },
+      "InfluxDevice_List": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InfluxDevice" }
+          }
+        }
+      },
+      "InfluxBackupTaskSettings": {
+        "type": "object",
+        "required": ["enabled", "target_device"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Status of Influx backup task.",
+            "example": true
+          },
+          "target_device": {
+            "type": "object",
+            "required": ["device_id", "partition_number"],
+            "properties": {
+              "device_id": {
+                "type": "integer",
+                "description": "Device ID of target device.",
+                "example": 1
+              },
+              "partition_number": {
+                "type": "integer",
+                "description": "Partition number of target device.",
+                "example": 1
+              },
+              "device_identifier": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Device identifier of target device.",
+                "example": "sinum_sd_slot"
+              },
+              "device_name": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Device name of target device.",
+                "example": "SD Card"
+              }
+            }
+          }
+        }
+      },
+      "InfluxBackupSettings": {
+        "type": "object",
+        "required": ["influx_backup", "influx_csv_generation"],
+        "properties": {
+          "influx_backup": {
+            "$ref": "#/components/schemas/InfluxBackupTaskSettings"
+          },
+          "influx_csv_generation": {
+            "$ref": "#/components/schemas/InfluxBackupTaskSettings"
+          }
+        }
+      },
+      "SystemResourcesSettings": {
+        "type": "object",
+        "required": ["enabled", "interval"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Status of system resources monitoring task.",
+            "example": true
+          },
+          "interval": {
+            "type": "integer",
+            "description": "System resources information dispatching interval in seconds.",
+            "minimum": 5,
+            "maximum": 60,
+            "example": 5
+          }
+        }
+      },
+      "TextTranslation": {
+        "description": "Represents multi-lang text entity.",
+        "type": "object",
+        "required": ["id", "text"],
+        "properties": {
+          "id": {
+            "description": "Text ID from translations database",
+            "type": "integer",
+            "readOnly": true,
+            "example": 552
+          },
+          "text": {
+            "description": "Text in english from translations database",
+            "type": "string",
+            "readOnly": true,
+            "example": "English translation goes here."
+          }
+        }
+      },
+      "Response.Error": {
+        "description": "Encountered error during request processing.",
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["message"],
+            "properties": {
+              "message": {
+                "type": "object",
+                "required": ["text", "id"],
+                "properties": {
+                  "text": { "type": "string" },
+                  "id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Response.ValidationError": {
+        "description": "Encountered error during validating request data. Validation rules described on <a href=\"http://git.tech.sp/wojciech.marmurowicz/eHomeDocs/wiki/Walidacja%20-%20odpowiedzi\">WikiDocs</a>",
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["message"],
+            "properties": {
+              "message": {
+                "allOf": [{ "$ref": "#/components/schemas/TextTranslation" }]
+              },
+              "errors": {
+                "description": "Dynamic hash map of validation errors with actual parameter name which failed validation",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "required": ["id", "text", "params"],
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "text": {
+                      "description": "Text in english from translations database",
+                      "type": "string"
+                    },
+                    "params": {
+                      "description": "Parameters which should be used in \"text\" instead of {} variables if there are any.",
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Response.GoGatewayError": {
+        "description": "Encountered error during request processing or sending through GO gateway.",
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["message"],
+            "properties": {
+              "message": {
+                "type": "object",
+                "required": ["text", "id"],
+                "properties": {
+                  "text": { "type": "string" },
+                  "id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "examples": {
+      "LogSettings": {
+        "value": {
+          "log": { "INFO": true, "STATUS": false, "ERROR": true },
+          "debug": {
+            "STANDARD_DEBUG": false,
+            "EVENTBUS_DEBUG": false,
+            "REST_DEBUG": false,
+            "DBG_BUTTON": false,
+            "DBG_WS": false,
+            "DBUS": false,
+            "TECH_UPDATE": false,
+            "UPDATE_CONTROLER": false
+          }
+        }
+      },
+      "LedSettings": { "value": { "mode": "managed_by_system" } },
+      "InfluxBackupSettings": {
+        "value": {
+          "influx_backup": {
+            "enabled": true,
+            "target_device": { "device_id": 1, "partition_number": 1 }
+          },
+          "influx_csv_generation": {
+            "enabled": true,
+            "target_device": { "device_id": 2, "partition_number": 1 }
+          }
+        }
+      },
+      "Response.NotModified": {
+        "description": "Returned when user tried to update object supplying same data as current values.",
+        "value": {
+          "error": { "message": { "text": "Object not modified.", "id": 7204 } }
+        }
+      },
+      "Response.RequestParseError": {
+        "description": "Returned when e-home-main process received invalid Json Request structure.",
+        "value": {
+          "error": {
+            "message": { "text": "Request data parse error.", "id": 7205 }
+          }
+        }
+      },
+      "Response.GoRequestParseError": {
+        "description": "Returned when e-home-go process failed to parse incoming json request.",
+        "value": {
+          "error": {
+            "message": { "text": "Request data parse error.", "id": 7205 }
+          }
+        }
+      },
+      "Response.EmptyDataError": {
+        "description": "Returned when request requires content but user didn`t supply data.",
+        "value": {
+          "error": {
+            "message": { "text": "Data cannot be empty.", "id": 7206 }
+          }
+        }
+      },
+      "Response.InvalidObjectIdSupplied": {
+        "description": "Returned when request url contains invalid object id (eg. non integer or out of int64 range).",
+        "value": {
+          "error": { "message": { "text": "Invalid object ID.", "id": 7207 } }
+        }
+      },
+      "Response.Unauthorized": {
+        "description": "Returned when authorization token (header) is invalid or expired.",
+        "value": {
+          "error": { "message": { "text": "Unauthorized.", "id": 6462 } }
+        }
+      },
+      "Response.RouteNotFound": {
+        "description": "Returned when route is not implemented.",
+        "value": {
+          "error": { "message": { "text": "Path not found.", "id": 7212 } }
+        }
+      },
+      "Response.ObjectNotFound": {
+        "description": "Returned when specific object was not found.",
+        "value": {
+          "error": { "message": { "text": "Object not found.", "id": 7211 } }
+        }
+      },
+      "Response.MethodNotAllowed": {
+        "description": "Returned when route method is not implemented.",
+        "value": {
+          "error": { "message": { "text": "Method not allowed.", "id": 7213 } }
+        }
+      },
+      "Response.RequestTimeout": {
+        "description": "Returned when request timeout happened. eg. e-home-main process works incorrectly or processing took more than 1 second.",
+        "value": {
+          "error": {
+            "message": { "text": "Request timeout exceeded", "id": 7334 }
+          }
+        }
+      },
+      "Response.ValidationFailed": {
+        "description": "Returned when request contains invalid data.",
+        "value": {
+          "error": {
+            "message": { "id": 7221, "text": "Validation failed" },
+            "errors": {
+              "my_string_param": {
+                "id": 7242,
+                "params": [],
+                "text": "Parameter should not contain special characters"
+              }
+            }
+          }
+        }
+      },
+      "Response.ObjectAllocationError": {
+        "description": "Returned when server failed to allocate object.",
+        "value": {
+          "error": {
+            "message": { "text": "Failed to create object.", "id": 7217 }
+          }
+        }
+      },
+      "Response.Formatting": {
+        "description": "Returned when formatter is busy - i.e. formatting of any device is in progress",
+        "value": {
+          "error": { "message": { "text": "Formatting...", "id": 8873 } }
+        }
+      },
+      "Response.UnknownError": {
+        "description": "Returned when unknown error happended. As always, this shouldn`t happen, but we all know it will happen :-)",
+        "value": {
+          "error": { "message": { "text": "Unknown error.", "id": 7220 } }
+        }
+      }
+    },
+    "responses": {
+      "NoContent": { "description": "Success, no content returned." },
+      "NotModified": {
+        "description": "Content not modified.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Response.Error" },
+            "examples": {
+              "NotModified": {
+                "$ref": "#/components/examples/Response.NotModified"
+              }
+            }
+          }
+        }
+      },
+      "UnknownError": {
+        "description": "Server side error.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Response.Error" },
+            "examples": {
+              "UnknownError": {
+                "$ref": "#/components/examples/Response.UnknownError"
+              }
+            }
+          }
+        }
+      },
+      "ObjectNotFound": {
+        "description": "Object not found.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Response.Error" },
+            "examples": {
+              "ObjectNotFound": {
+                "$ref": "#/components/examples/Response.ObjectNotFound"
+              }
+            }
+          }
+        }
+      },
+      "ValidationFailed": {
+        "description": "Validation error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Response.ValidationError"
+            },
+            "examples": {
+              "ValidationFailed": {
+                "$ref": "#/components/examples/Response.ValidationFailed"
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Authorization error.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Response.Error" },
+            "examples": {
+              "UnauthorizedError": {
+                "$ref": "#/components/examples/Response.Unauthorized"
+              }
+            }
+          }
+        }
+      },
+      "RequestTimeout": {
+        "description": "Server (Gateway) side error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Response.GoGatewayError"
+            },
+            "examples": {
+              "RequestTimeout": {
+                "$ref": "#/components/examples/Response.RequestTimeout"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "JWT": { "type": "apiKey", "in": "header", "name": "Authorization" }
+    }
+  },
+  "security": [{ "JWT": [] }]
+}

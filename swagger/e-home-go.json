@@ -1,0 +1,3401 @@
+{
+  "openapi": "3.0.3",
+  "servers": [
+    {
+      "description": "Sinum Local API",
+      "url": "http://{hostname_or_ip}/api/v1",
+      "variables": { "hostname_or_ip": { "default": "sinum.local" } }
+    }
+  ],
+  "info": {
+    "description": "eHome Go Process BackEnd API documentation",
+    "version": "1.20.0",
+    "title": "[Local] eHome Go API",
+    "contact": { "email": "gorkiewicz@techsterowniki.pl" }
+  },
+  "tags": [
+    { "name": "auth", "description": "Authentication endpoints" },
+    { "name": "users", "description": "Users endpoints" },
+    { "name": "web-socket", "description": "WebSocket endpoint" },
+    { "name": "translations", "description": "Translations endpoint" },
+    { "name": "regulations", "description": "Regulations endpoints" },
+    { "name": "feature-flags", "description": "Feature flags endpoint" },
+    { "name": "token-api", "description": "Menage token api" },
+    { "name": "video", "description": "Video endpoints" },
+    { "name": "utils", "description": "Utils endpoints" }
+  ],
+  "paths": {
+    "/ws": {
+      "get": {
+        "tags": ["web-socket"],
+        "summary": "Opens WebSocket",
+        "responses": { "101": { "description": "Success" } }
+      }
+    },
+    "/ws-cloud": {
+      "get": {
+        "tags": ["web-socket"],
+        "summary": "Opens WebSocket - uid info",
+        "responses": { "101": { "description": "Success" } }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Authenticates the user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Credentials" }
+            }
+          }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "session": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "refresh_token": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Incorrect username or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "enum": [
+                                "Unfortunately, the username or password is incorrect."
+                              ]
+                            },
+                            "id": { "type": "number", "enum": [1135] }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Removes the user's session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "authenticated": { "type": "boolean", "enum": [false] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "refresh token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshToken" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "session": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "refresh_token": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud-login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Cloud token authorization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CredentialsCloud" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "session": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "refresh_token": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "wrong cloud token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "enum": [
+                                "Unfortunately, the username or password is incorrect."
+                              ]
+                            },
+                            "id": { "type": "number", "enum": [1135] }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Gets all users",
+        "description": "This can be done only by the admin",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["users"],
+        "summary": "Creates user",
+        "description": "This can be done only by the admin",
+        "responses": {
+          "200": {
+            "description": "User account has been created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "session": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewUser" }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Updates the user",
+        "description": "At least one parameter in request body required",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewUser" }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "User account has been updated" },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Deletes the user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User account has been deleted" },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["users"],
+        "summary": "get user info",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "session": {
+                          "type": "string",
+                          "example": "MTYzMHxuWmNmV2dGb[...]"
+                        },
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users-count": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Gets the number of users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "count": { "type": "number", "example": 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users-count/online": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Gets the number of users is online",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxOnlineUserRunResult"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/password": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Updates the user password",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewPassword" }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "User account has been updated" },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/dashboards": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Get user partial dashboards",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Dashboard" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["users"],
+        "summary": "Create dashboard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["name"],
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Dashboard 1" },
+                  "widgets": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/DashboardWidget" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Dashboard" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/dashboards/{dashboard_id}": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Update dashboard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "description": "Dashboard ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Dashboard 1" },
+                  "widgets": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/DashboardWidget" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Dashboard" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Deletes the user dashboard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "description": "Dashboard ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User dashboard has been deleted" },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/dashboards/{dashboard_id}/widgets": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Update user dashboard widget",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "description": "Dashboard ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewDashboardWidget" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/DashboardWidget" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/dashboards/{dashboard_id}/widgets/{widget_id}": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Update user dashboard widget",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "description": "Dashboard ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "widget_id",
+            "description": "Widget ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewDashboardWidget" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/DashboardWidget" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Deletes the user dashboard widget",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "description": "Dashboard ID",
+            "required": true,
+            "schema": { "type": "number" }
+          },
+          {
+            "in": "path",
+            "name": "widget_id",
+            "description": "Widget ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User dashboard has been deleted" },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/settings": {
+      "put": {
+        "tags": ["users"],
+        "summary": "Creates or replaces the user settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "example": { "id": 101, "type": "wtp" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "example": { "id": 101, "type": "obj" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["users"],
+        "summary": "Deletes the user settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User settings has been deleted" },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/notifications": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "replaces the user notifications settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NotificationSettings" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User dashboard has been created or replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reset-password": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Sets a new user password",
+        "responses": {
+          "204": { "description": "The user password has been changed" },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/last-time": {
+      "patch": {
+        "tags": ["users"],
+        "summary": "Mark all notification as read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User last-time has been updated" },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/notification-count": {
+      "get": {
+        "tags": ["users"],
+        "summary": "returns the number of unread notifications",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User last-time has been updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "count": { "type": "number", "example": 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/translations/{language}": {
+      "get": {
+        "tags": ["translations"],
+        "summary": "Get translations.It is possible to get list by adding following body to request {\"id\":[234,532,5324]}",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "language",
+            "schema": { "type": "string" },
+            "required": true,
+            "description": "lang id",
+            "example": "pl"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "path": { "type": "string" },
+                          "translation": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["translations"],
+        "summary": "Get translations.It is possible to get list by adding following body to request {\"id\":[234,532,5324]}",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "language",
+            "schema": { "type": "string" },
+            "required": true,
+            "description": "lang id",
+            "example": "pl"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "path": { "type": "string" },
+                          "translation": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/regulations/hashes": {
+      "get": {
+        "tags": ["regulations"],
+        "summary": "Get current regulation hashes (versions).",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "activity_data_consent": {
+                          "type": "string",
+                          "readOnly": true,
+                          "example": "c116d19fa7c72e74830726b789e381088647c7a96a4201591224d43face7feff"
+                        },
+                        "privacy_policy": {
+                          "type": "string",
+                          "readOnly": true,
+                          "example": "699d8076f7f3461ce254eca15d8a07be797c68223c1318bf6bdd32a66cb2aba0"
+                        },
+                        "terms_of_service": {
+                          "type": "string",
+                          "readOnly": true,
+                          "example": "c095902b5daf04363bec543309f8c6d897713d8facf695a59f891913bd7db6c6"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/regulations/body/{language}/{name}": {
+      "get": {
+        "tags": ["regulations"],
+        "summary": "Returns desired regulation body translated to selected lang.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "language",
+            "schema": {
+              "type": "string",
+              "enum": ["pl", "en", "cs", "sk", "hu", "nl", "de"]
+            },
+            "required": true,
+            "description": "Language version of regulation body (content)"
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "activity_data_consent",
+                "privacy_policy",
+                "terms_of_service"
+              ]
+            },
+            "required": true,
+            "description": "Name of regulation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "readOnly": true,
+                      "example": "Markdown formatted regulation body goes here."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid name or language provided",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Regulation not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feature-flags": {
+      "get": {
+        "tags": ["feature-flags"],
+        "summary": "Get feature flags JSON.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/FeatureFlags" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/api-token": {
+      "get": {
+        "tags": ["token-api"],
+        "summary": "Get token-api list.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer", "example": "1" },
+                          "name": { "type": "string", "example": "test" },
+                          "token": {
+                            "type": "string",
+                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjY3MDhjYWU0LWZlY2ItNDIzOC1hNDljLTM4ODMwZWIyMDM0YyIsImV4cGlyZXNfYXQiOjE2NjI3MTM2MDMsImV4cGlyZXNfaW4iOjM2MDAsInVzZXJfaWQiOiIyIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJ1c2VyX3JvbGUiOiJTVVBFUl9BRE1JTiJ9.O9FtapWtEo64x8kigj7uX1KgtKdGhffpUWeDJfXcACk"
+                          },
+                          "user_id": { "type": "integer", "example": "1" },
+                          "created_at": {
+                            "type": "string",
+                            "example": "2022-07-07T07:58:41Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["token-api"],
+        "summary": "Add token-api .",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "test" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": "1" },
+                        "name": { "type": "string", "example": "test" },
+                        "token": {
+                          "type": "string",
+                          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjY3MDhjYWU0LWZlY2ItNDIzOC1hNDljLTM4ODMwZWIyMDM0YyIsImV4cGlyZXNfYXQiOjE2NjI3MTM2MDMsImV4cGlyZXNfaW4iOjM2MDAsInVzZXJfaWQiOiIyIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJ1c2VyX3JvbGUiOiJTVVBFUl9BRE1JTiJ9.O9FtapWtEo64x8kigj7uX1KgtKdGhffpUWeDJfXcACk"
+                        },
+                        "user_id": { "type": "integer", "example": "1" },
+                        "created_at": {
+                          "type": "string",
+                          "example": "2022-07-07T07:58:41Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/api-token/{id}": {
+      "delete": {
+        "tags": ["token-api"],
+        "summary": "delete token-api .",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "token ID",
+            "required": true,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Success." },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/firms": {
+      "get": {
+        "tags": ["firm"],
+        "summary": "Get extra firm list.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "firm": { "items": { "type": "string" } }
+                      },
+                      "example": { "firm": ["defro", "kolton"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["firm"],
+        "summary": "Edit extra firm .",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "firm": { "items": { "type": "string" } } }
+              },
+              "example": { "firm": ["defro", "kolton"] }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "firm": { "items": { "type": "string" } }
+                      },
+                      "example": { "firm": ["defro", "kolton"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/available-firms": {
+      "get": {
+        "tags": ["firm"],
+        "summary": "Get available firm list.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "firm": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      },
+                      "example": { "firm": ["defro", "kolton", "tech"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connection-status": {
+      "get": {
+        "tags": ["connection-status"],
+        "summary": "Get cloud and internet connection status.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data"],
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/ConnectionStatus" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/ring-answer": {
+      "post": {
+        "tags": ["video"],
+        "summary": "Receive ring answer from video intercom.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VideoMessage" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success." },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/ring-bye": {
+      "post": {
+        "tags": ["video"],
+        "summary": "Receive ring bye message from video intercom.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VideoMessage" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success." },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera-list": {
+      "get": {
+        "tags": ["video"],
+        "summary": "Get list of cameras",
+        "responses": {
+          "200": {
+            "description": "List of cameras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Camera" }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera": {
+      "post": {
+        "tags": ["video"],
+        "summary": "Add new camera",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CameraInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Camera added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Camera" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid camera data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera/{id}": {
+      "delete": {
+        "tags": ["video"],
+        "summary": "Delete camera",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Camera ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Camera deleted successfully" },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Camera not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["video"],
+        "summary": "Update camera",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Camera ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CameraInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Camera updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Camera" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid camera data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera-config": {
+      "get": {
+        "tags": ["video"],
+        "summary": "Get video configuration",
+        "responses": {
+          "200": {
+            "description": "Video configuration",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CameraConfig" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["video"],
+        "summary": "Update video configuration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CameraConfig" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Configuration updated successfully" },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera/{id}/snapshot": {
+      "get": {
+        "tags": ["video"],
+        "summary": "Get camera snapshot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Camera ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Camera snapshot",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Snapshot" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera/{id}/stream": {
+      "post": {
+        "tags": ["video"],
+        "summary": "Initialize video stream from camera",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Camera ID",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "additionalProperties": true }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stream details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StreamDetails" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/camera/candidate": {
+      "post": {
+        "tags": ["video"],
+        "summary": "Send ICE candidate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VideoCandidate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Candidate received"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Credentials": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string", "example": "admin" },
+          "password": { "type": "string", "example": "admin" },
+          "os_info": { "type": "string", "example": "ios" },
+          "device_info": { "type": "string", "example": "chrome" },
+          "uuid_device": { "type": "string", "example": "5432-5432-5432" }
+        }
+      },
+      "RefreshToken": {
+        "type": "object",
+        "required": ["refresh_token"],
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU5MTMwMDgsInJlZnJlc2hfdXVpZCI6IjU5Zjc4OTk2LTY3MjUtNGY3Ni04ODU5LTI5MzVlMTE1ZjU0YisrMiIsInVzZXJfaWQiOiIyIiwidXNlcl9uYW1lIjoiYWRtaW4ifQ.vlBHSe8mPWSqCckZ6l5B4K8X-nQzlLaf79rgyNmeCOE"
+          }
+        }
+      },
+      "CredentialsCloud": {
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU5MTMwMDgsInJlZnJlc2hfdXVpZCI6IjU5Zjc4OTk2LTY3MjUtNGY3Ni04ODU5LTI5MzVlMTE1ZjU0YisrMiIsInVzZXJfaWQiOiIyIiwidXNlcl9uYW1lIjoiYWRtaW4ifQ.vlBHSe8mPWSqCckZ6l5B4K8X-nQzlLaf79rgyNmeCOE"
+          }
+        }
+      },
+      "FeatureFlags": {
+        "type": "object",
+        "required": ["enabled"],
+        "properties": {
+          "enabled": {
+            "type": "array",
+            "items": { "type": "string" },
+            "example": "[\"d:t:ri\", \"d:t:bci\", \"d:w:c\"]"
+          }
+        }
+      },
+      "DashboardWidget.Type": {
+        "type": "string",
+        "enum": [
+          "room_summary",
+          "rooms",
+          "scenes",
+          "automations",
+          "devices",
+          "weather",
+          "schedule",
+          "live_notifications",
+          "schedule_temperature_curve",
+          "energy_flow_monitor",
+          "electricity_exchange",
+          "energy_consumption",
+          "energy_storage",
+          "energy_production",
+          "statistics",
+          "device_summary"
+        ],
+        "example": "energy_flow_monitor"
+      },
+      "DashboardWidgetBase": {
+        "required": ["type", "name", "id", "column", "order_in_column"],
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Widget 1" },
+          "type": { "$ref": "#/components/schemas/DashboardWidget.Type" },
+          "column": { "type": "number", "example": 1 },
+          "order_in_column": { "type": "number", "example": 1 }
+        }
+      },
+      "DashboardWidget.Rooms": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["rooms"],
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "required": ["id", "order"],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1,
+                      "description": "Room id"
+                    },
+                    "order": { "type": "number", "example": 1 }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.Devices": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["devices"],
+            "type": "object",
+            "properties": {
+              "devices": {
+                "type": "array",
+                "items": {
+                  "required": ["id", "class", "order"],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1,
+                      "description": "Device id"
+                    },
+                    "class": {
+                      "type": "string",
+                      "example": "wtp",
+                      "description": "Device class"
+                    },
+                    "order": { "type": "number", "example": 1 }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.Scenes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["scenes"],
+            "type": "object",
+            "properties": {
+              "scenes": {
+                "type": "array",
+                "items": {
+                  "required": ["id", "order"],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1,
+                      "description": "Scene id"
+                    },
+                    "order": { "type": "number", "example": 1 }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.Automations": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["automations"],
+            "type": "object",
+            "properties": {
+              "automations": {
+                "type": "array",
+                "items": {
+                  "required": ["id", "order"],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1,
+                      "description": "Automation id"
+                    },
+                    "order": { "type": "number", "example": 1 }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.DeviceSummary": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["device"],
+            "type": "object",
+            "properties": {
+              "device": {
+                "required": ["id", "class"],
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "example": 1,
+                    "description": "Device id"
+                  },
+                  "class": {
+                    "type": "string",
+                    "example": "wtp",
+                    "description": "Device class"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.Statistics": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["query_id", "range"],
+            "type": "object",
+            "properties": {
+              "query_id": {
+                "type": "number",
+                "example": 1,
+                "description": "Influx query template id"
+              },
+              "range": {
+                "type": "number",
+                "example": 1,
+                "description": "Range unit in days"
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.Schedule": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["schedule_id"],
+            "type": "object",
+            "properties": {
+              "schedule_id": {
+                "type": "number",
+                "example": 1,
+                "description": "Schedule id"
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.LiveNotifications": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["notification_limit", "last_clear_date", "columns"],
+            "type": "object",
+            "properties": {
+              "notification_limit": {
+                "type": "number",
+                "example": 1,
+                "description": "Number of notifications to display"
+              },
+              "last_clear_date": {
+                "type": "string",
+                "example": "2020-01-01T00:00:00.000Z",
+                "description": "Date iso string of last clear notifications"
+              },
+              "columns": {
+                "type": "array",
+                "items": { "type": "string", "example": "time" },
+                "description": "Column names to display"
+              }
+            }
+          }
+        ]
+      },
+      "DashboardWidget.RoomSummary": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          {
+            "required": ["room_id"],
+            "type": "object",
+            "properties": {
+              "room_id": {
+                "type": "number",
+                "example": 1,
+                "description": "Room id"
+              }
+            }
+          }
+        ]
+      },
+      "NewDashboardWidget": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/DashboardWidgetBase" },
+          { "$ref": "#/components/schemas/DashboardWidget.Rooms" },
+          { "$ref": "#/components/schemas/DashboardWidget.Automations" },
+          { "$ref": "#/components/schemas/DashboardWidget.Scenes" },
+          { "$ref": "#/components/schemas/DashboardWidget.Devices" },
+          { "$ref": "#/components/schemas/DashboardWidget.DeviceSummary" },
+          { "$ref": "#/components/schemas/DashboardWidget.Statistics" },
+          { "$ref": "#/components/schemas/DashboardWidget.LiveNotifications" },
+          { "$ref": "#/components/schemas/DashboardWidget.RoomSummary" },
+          { "$ref": "#/components/schemas/DashboardWidget.Schedule" }
+        ]
+      },
+      "DashboardWidget": {
+        "allOf": [
+          { "$ref": "#/components/schemas/NewDashboardWidget" },
+          {
+            "required": ["id"],
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "example": 1,
+                "description": "Widget id"
+              }
+            }
+          }
+        ]
+      },
+      "NewDashboard": {
+        "required": ["name", "widgets"],
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Dashboard 1" },
+          "widgets": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DashboardWidget" }
+          }
+        }
+      },
+      "Dashboard": {
+        "type": "object",
+        "required": ["id", "widgets", "structure"],
+        "allOf": [
+          {
+            "properties": {
+              "id": { "type": "number", "example": "Dashboard ID" }
+            }
+          },
+          { "$ref": "#/components/schemas/NewDashboard" }
+        ]
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "user_role",
+          "username",
+          "privacy_policy",
+          "terms_of_service",
+          "activity_data_consent",
+          "created_at",
+          "settings",
+          "email",
+          "locale",
+          "notifications",
+          "last_time",
+          "cloud_uid"
+        ],
+        "properties": {
+          "id": { "type": "number", "example": 77 },
+          "type": { "type": "string", "enum": ["local_user", "cloud_user"] },
+          "user_role": {
+            "type": "string",
+            "enum": ["SUPER_ADMIN", "ADMIN", "INSTALLER", "USER", "GUEST"]
+          },
+          "username": { "type": "string", "example": "John" },
+          "privacy_policy": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c095902b5daf04363bec543309f8c6d897713d8facf695a59f891913bd7db6c6"
+              }
+            }
+          },
+          "terms_of_service": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c116d19fa7c72e74830726b789e381088647c7a96a4201591224d43face7feff"
+              }
+            }
+          },
+          "activity_data_consent": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c095902b5daf04363bec543309f8c6d897713d8facf695a59f891913bd7db6c6"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2016-08-29T09:12:33.001Z"
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "class": { "type": "string" },
+                "id": { "type": "number" }
+              }
+            }
+          },
+          "email": { "type": "string", "example": "luki@gmail.com" },
+          "locale": { "type": "string", "example": "pl-PL" },
+          "last_time": {
+            "type": "string",
+            "description": "time when user read notification ",
+            "example": 0
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/NotificationSettings"
+          },
+          "cloud_uid": {
+            "type": "string",
+            "example": "63ade806-3800-4bb3-b78c-db54bde89509"
+          }
+        }
+      },
+      "NewUser": {
+        "type": "object",
+        "required": [
+          "user_role",
+          "username",
+          "password",
+          "privacy_policy",
+          "terms_of_service",
+          "activity_data_consent",
+          "locale"
+        ],
+        "properties": {
+          "user_role": { "type": "string", "enum": ["ADMIN", "USER", "GUEST"] },
+          "username": { "type": "string", "example": "John" },
+          "password": { "type": "string", "example": "foobar" },
+          "privacy_policy": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c095902b5daf04363bec543309f8c6d897713d8facf695a59f891913bd7db6c6"
+              }
+            }
+          },
+          "terms_of_service": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c116d19fa7c72e74830726b789e381088647c7a96a4201591224d43face7feff"
+              }
+            }
+          },
+          "activity_data_consent": {
+            "type": "object",
+            "properties": {
+              "accepted": { "type": "boolean", "example": true },
+              "version": {
+                "type": "string",
+                "example": "c095902b5daf04363bec543309f8c6d897713d8facf695a59f891913bd7db6c6"
+              }
+            }
+          },
+          "locale": { "type": "string", "example": "pl-PL" }
+        }
+      },
+      "NewPassword": {
+        "type": "object",
+        "required": ["current_password", "new_password"],
+        "properties": {
+          "current_password": { "type": "string" },
+          "new_password": { "type": "string" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "description": "is equal `regulations` if regulation is no accepted",
+                "type": "string"
+              },
+              "message": {
+                "type": "object",
+                "properties": {
+                  "text": { "type": "string" },
+                  "id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "InfluxOnlineUserRunResult": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "time",
+                "connection_type",
+                "role",
+                "user_name",
+                "stop_time",
+                "user_id",
+                "os_info",
+                "device_info",
+                "uuid_device"
+              ],
+              "properties": {
+                "time": {
+                  "description": "login time",
+                  "type": "string",
+                  "example": "2022-07-07T15:20:52.72342558Z"
+                },
+                "connection_type": {
+                  "description": "local connection or cloud connection",
+                  "type": "string",
+                  "enum": ["CloudConnection", "LocalConnection"]
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "SUPER_ADMIN",
+                    "ADMIN",
+                    "INSTALLER",
+                    "USER",
+                    "GUEST",
+                    "lora",
+                    "ROLE_SUPER_TECH_ADMIN",
+                    "ROLE_TECH_ADMIN"
+                  ]
+                },
+                "user_name": { "type": "string", "example": "admin" },
+                "stop_time": {
+                  "description": "logout time",
+                  "type": "string",
+                  "example": "2022-07-07T15:20:52.72342558Z"
+                },
+                "user_id": { "type": "string", "example": "5" },
+                "os_info": {
+                  "type": "string",
+                  "example": "android,ios,windows"
+                },
+                "device_info": { "type": "string", "example": "" },
+                "uuid_device": { "type": "string", "example": "" }
+              }
+            }
+          }
+        }
+      },
+      "NotificationSettings": {
+        "type": "object",
+        "properties": {
+          "automations": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "lora": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "sbus": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "scene": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "system_module": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "tech": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "virtual": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "wtp": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "modbus": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          },
+          "alarm_system": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "info": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              },
+              "warning": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "boolean" },
+                  "push": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "VideoMessage": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "to": { "type": "string" },
+              "from": { "type": "string" },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "sdp": { "type": "string" },
+                  "type": { "type": "string" }
+                }
+              },
+              "session_id": { "type": "string" },
+              "media": { "type": "string" }
+            }
+          }
+        }
+      },
+      "ConnectionStatus": {
+        "type": "object",
+        "required": ["cloud_status", "internet_status"],
+        "properties": {
+          "cloud_status": {
+            "description": "Connection status with cloud service.",
+            "type": "boolean",
+            "example": true
+          },
+          "internet_status": {
+            "description": "Connection status with Internet.",
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "example": { "cloud_status": true, "internet_status": true }
+      },
+      "Camera": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique camera identifier",
+            "readOnly": true
+          },
+          "name": { "type": "string", "description": "Camera name" },
+          "ip": { "type": "string", "description": "Camera IP address" },
+          "mac": { "type": "string", "description": "Camera MAC address" },
+          "type": {
+            "type": "string",
+            "description": "Camera type (e.g. ONVIF, RTSP)"
+          },
+          "login": { "type": "string", "description": "Camera login" },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Camera password"
+          },
+          "url": {
+            "type": "string",
+            "description": "Camera stream URL (e.g. RTSP)"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation date",
+            "readOnly": true
+          },
+          "modification_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last modification date",
+            "readOnly": true
+          }
+        }
+      },
+      "CameraInput": {
+        "type": "object",
+        "description": "Camera data used for creation (POST) and update (PATCH)",
+        "properties": {
+          "name": { "type": "string", "description": "Camera name" },
+          "ip": { "type": "string", "description": "Camera IP address" },
+          "mac": { "type": "string", "description": "Camera MAC address" },
+          "type": {
+            "type": "string",
+            "description": "Camera type (e.g. ONVIF, RTSP)"
+          },
+          "login": { "type": "string", "description": "Camera login" },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Camera password"
+          },
+          "url": {
+            "type": "string",
+            "description": "Camera stream URL (e.g. RTSP)"
+          }
+        },
+        "required": ["name"]
+      },
+      "CameraConfig": {
+        "type": "object",
+        "description": "Video system configuration",
+        "properties": {
+          "setting1": { "type": "string" },
+          "setting2": { "type": "boolean" }
+        }
+      },
+      "Snapshot": {
+        "type": "object",
+        "description": "Camera snapshot response",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "url",
+            "example": "/snapshots/camera1_latest.jpg"
+          }
+        }
+      },
+      "StreamDetails": {
+        "type": "object",
+        "description": "Stream initialization response",
+        "properties": {
+          "sdp": { "type": "string", "example": "v=0\r\no=- ..." }
+        }
+      },
+      "VideoCandidate": {
+        "type": "object",
+        "description": "ICE candidate structure",
+        "properties": {
+          "candidate": { "type": "string", "example": "candidate:..." },
+          "sdpMid": { "type": "string", "example": "video" },
+          "sdpMLineIndex": { "type": "integer", "example": 0 }
+        },
+        "required": ["candidate"]
+      }
+    },
+    "securitySchemes": {
+      "JWT": { "type": "apiKey", "in": "header", "name": "Authorization" }
+    }
+  },
+  "security": [{ "JWT": [] }]
+}

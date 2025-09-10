@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sinum": {
+      "command": "node",
+      "args": ["/Users/damiantokarczyk/Development/techsterowniki/sinum-mcp/dist/index.js"],
+      "env": {
+        "SINUM_API_URL": "http://sinum.local/api/v1",
+        "SINUM_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
