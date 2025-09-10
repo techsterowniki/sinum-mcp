@@ -8,7 +8,10 @@ This MCP server enables interaction with the Sinum system through Model Context 
 
 ## Features
 
-- **feature_list**: Retrieving list of all devices in the Sinum system
+- **device_list**: Retrieving list of all devices in the Sinum system
+- **scene_list**: Retrieving list of all scenes in the Sinum system
+- **scene_activate**: Activating scenes by ID
+- **toggle_light**: Toggling light devices (relay type with purpose === light)
 - API key authorization
 - Support for various device types (WTP, TECH, Virtual, SBus, SLink, LoRa, Modbus, etc.)
 
@@ -64,7 +67,7 @@ Add the server to your MCP configuration:
 
 ## API
 
-### feature_list
+### device_list
 
 Retrieves a list of all devices in the Sinum system.
 
@@ -73,6 +76,36 @@ Retrieves a list of all devices in the Sinum system.
 
 **Returns:**
 - Collection of devices grouped by types (WTP, TECH, Virtual, SBus, SLink, LoRa, Modbus, System Module, Alarm System, Video, Custom Device Module)
+
+### scene_list
+
+Retrieves a list of all scenes in the Sinum system.
+
+**Parameters:**
+- None
+
+**Returns:**
+- Collection of scenes with their details
+
+### scene_activate
+
+Activates a scene with the given ID in the Sinum system.
+
+**Parameters:**
+- `id` (required): ID of the scene to activate
+
+**Returns:**
+- Success status and message
+
+### toggle_light
+
+Toggles the state of a light device (on/off) for devices of type relay with purpose === light.
+
+**Parameters:**
+- `device_id` (required): ID of the device to toggle
+
+**Returns:**
+- Success status, message, and updated device information
 
 ## Project Structure
 
@@ -86,7 +119,10 @@ sinum-mcp/
 │   ├── services/
 │   │   └── sinum-api.ts     # Service for communication with Sinum API
 │   └── tools/
-│       └── feature-list.ts  # Tool for retrieving device list
+│       ├── device-list.ts   # Tool for retrieving device list
+│       ├── scene-list.ts    # Tool for retrieving scene list
+│       ├── scene-activate.ts # Tool for activating scenes
+│       └── toggle-light.ts  # Tool for toggling light devices
 ├── dist/                    # Compiled files
 ├── package.json
 ├── tsconfig.json
