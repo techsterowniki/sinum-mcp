@@ -5,7 +5,7 @@ import { DeviceCollection } from '../types/device.js';
 
 export const deviceListTool: Tool = {
   name: 'device_list',
-  description: 'Retrieves a list of all devices in the Sinum smarthome system',
+  description: 'Retrieves a list of all devices/features in the Sinum smarthome system',
   inputSchema: {
     type: 'object',
     properties: {

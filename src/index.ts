@@ -10,6 +10,9 @@ import {
 import { SinumApiService } from './services/sinum-api.js';
 import { ApiConfig } from './types/api.js';
 import { deviceListTool, executeDeviceList } from './tools/device-list.js';
+import { sceneListTool, executeSceneList } from './tools/scene-list.js';
+import { sceneActivateTool, executeSceneActivate } from './tools/scene-activate.js';
+import { toggleLightTool, executeToggleLight } from './tools/toggle-light.js';
 
 class SinumMCPServer {
   private server: Server;
@@ -59,7 +62,7 @@ class SinumMCPServer {
     // List tools handler
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: [deviceListTool],
+        tools: [deviceListTool, sceneListTool, sceneActivateTool, toggleLightTool],
       };
     });
 
@@ -76,6 +79,39 @@ class SinumMCPServer {
                 {
                   type: 'text',
                   text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+
+          case 'scene_list':
+            const sceneResult = await executeSceneList(this.apiService);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(sceneResult, null, 2),
+                },
+              ],
+            };
+
+          case 'scene_activate':
+            const activateResult = await executeSceneActivate(this.apiService, args || {});
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(activateResult, null, 2),
+                },
+              ],
+            };
+
+          case 'toggle_light':
+            const toggleResult = await executeToggleLight(this.apiService, args || {});
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(toggleResult, null, 2),
                 },
               ],
             };

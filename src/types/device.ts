@@ -5,6 +5,8 @@ export const BaseDeviceSchema = z.object({
   id: z.number(),
   name: z.string(),
   type: z.string(),
+  class: z.string().optional(),
+  purpose: z.string().optional(),
   status: z.string().optional(),
   last_seen: z.string().optional(),
   created_at: z.string().optional(),

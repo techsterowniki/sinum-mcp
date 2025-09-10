@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { ApiConfig, ApiError, FeatureListParams } from '../types/api.js';
+import { ApiConfig, ApiError, FeatureListParams, SceneCollection, SceneActivateParams } from '../types/api.js';
 import { DevicesResponse, DevicesResponseSchema } from '../types/device.js';
 
 export class SinumApiService {
@@ -109,6 +109,53 @@ export class SinumApiService {
     } catch (error) {
       console.error('❌ Error testing Sinum API connection:', error);
       return false;
+    }
+  }
+
+  /**
+   * Retrieves a list of all scenes from the Sinum system
+   */
+  async getScenes(): Promise<{ data: SceneCollection }> {
+    try {
+      const response: AxiosResponse = await this.client.get('/scenes');
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch scenes: ${error.message}`);
+      }
+      throw new Error('Unknown error occurred while fetching scenes');
+    }
+  }
+
+  /**
+   * Activates a scene by ID
+   */
+  async activateScene(params: SceneActivateParams): Promise<void> {
+    try {
+      await this.client.post(`/scenes/${params.id}/activate`);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to activate scene: ${error.message}`);
+      }
+      throw new Error('Unknown error occurred while activating scene');
+    }
+  }
+
+  /**
+   * Sends a command to a device
+   */
+  async sendCommand(deviceClass: string, deviceId: number, command: string, body?: any): Promise<any> {
+    try {
+      const response: AxiosResponse = await this.client.post(
+        `/devices/${deviceClass}/${deviceId}/command/${command}`,
+        body || {}
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to send command to device: ${error.message}`);
+      }
+      throw new Error('Unknown error occurred while sending command to device');
     }
   }
 
